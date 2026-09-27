@@ -1,0 +1,91 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Gold Emperor</title><style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Inter,Arial,sans-serif}
+canvas{display:block;width:100%;height:100%}
+.hud{
+ position:fixed;left:18px;bottom:16px;z-index:20;color:#f5e7b2cc;
+ font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+ backdrop-filter: blur(8px);background:#00000055;border:1px solid #d8b04c33;
+ padding:8px 10px;border-radius:999px;user-select:none
+}
+.hud b{color:#ffe08a}
+</style></head>
+<body><canvas id="c"></canvas><div class="hud"><b>Gold Emperor</b> • F fullscreen • Massive gold energy</div>
+<script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,t=0;
+function R(){W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio}addEventListener('resize',R);R();
+
+function loop(){
+  t+=.018;
+  g.fillStyle='rgba(2,2,2,.23)';
+  g.fillRect(0,0,W,H);
+
+  let bg=g.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#100a00');
+  bg.addColorStop(.5,'#020202');
+  bg.addColorStop(1,'#000');
+  g.fillStyle=bg;
+  g.fillRect(0,0,W,H);
+
+  // Huge central glow
+  let rg=g.createRadialGradient(W/2,H/2,20,W/2,H/2,Math.min(W,H)*.43);
+  rg.addColorStop(0,'rgba(255,250,230,.96)');
+  rg.addColorStop(.12,'rgba(255,220,120,.95)');
+  rg.addColorStop(.32,'rgba(255,175,20,.58)');
+  rg.addColorStop(.62,'rgba(140,84,0,.22)');
+  rg.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=rg;
+  g.beginPath(); g.arc(W/2,H/2,Math.min(W,H)*.43,0,7); g.fill();
+
+  // Rotating huge spokes
+  g.save();
+  g.translate(W/2,H/2);
+  for(let i=0;i<24;i++){
+    g.rotate((Math.PI*2)/24);
+    let len=Math.min(W,H)*(.26 + .08*Math.sin(t*3+i));
+    let grd=g.createLinearGradient(0,0,len,0);
+    grd.addColorStop(0,'rgba(255,245,210,.95)');
+    grd.addColorStop(.22,'rgba(255,210,95,.82)');
+    grd.addColorStop(1,'rgba(255,160,20,0)');
+    g.strokeStyle=grd;
+    g.lineWidth=6 + 5*Math.sin(t+i);
+    g.shadowBlur=18; g.shadowColor='rgba(255,210,90,.55)';
+    g.beginPath();
+    g.moveTo(0,0); g.lineTo(len,0); g.stroke();
+  }
+  g.restore();
+  g.shadowBlur=0;
+
+  // Expanding rings
+  for(let i=0;i<10;i++){
+    let r=((t*120+i*55)%(Math.min(W,H)*.8));
+    g.beginPath();
+    g.arc(W/2,H/2,r,0,7);
+    g.strokeStyle=`rgba(255,215,90,${.5-r/(Math.min(W,H)*.9)})`;
+    g.lineWidth=3;
+    g.stroke();
+  }
+
+  // side gold panels
+  for(let s of [0.14,0.86]){
+    for(let i=0;i<5;i++){
+      let x=W*s + Math.sin(t*2+i)*10;
+      let y=H*(.18+i*.13);
+      let w=W*.08, h=H*.07;
+      let grd=g.createLinearGradient(x,y,x+w,y+h);
+      grd.addColorStop(0,'rgba(255,245,200,.8)');
+      grd.addColorStop(.4,'rgba(255,200,70,.65)');
+      grd.addColorStop(1,'rgba(120,70,0,.18)');
+      g.fillStyle=grd;
+      g.fillRect(x-w/2,y-h/2,w,h);
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+loop();
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='f')document.documentElement.requestFullscreen?.()})
+</script></body></html>
